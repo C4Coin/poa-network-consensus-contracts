@@ -14,6 +14,17 @@ const EmissionFunds = artifacts.require("./EmissionFunds");
 const EternalStorageProxy = artifacts.require("./eternal-storage/EternalStorageProxy.sol");
 const Web3 = require('web3')
 
+// Delegate burn
+// ----
+const QD = artifacts.require('QueueDelegate')
+const BSB = artifacts.require('BurnableStakeBank')
+const TR  = artifacts.require('TokenRegistry')
+const BurnableERC20 = artifacts.require('BurnableERC20')
+const co2knCap = 100000
+const minStake = 1
+// ----
+
+
 const getWeb3Latest = () => {
  const web3Latest = new Web3(web3.currentProvider)
  return web3Latest
@@ -213,6 +224,29 @@ module.exports = function(deployer, network, accounts) {
 
         fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2));
       }
+
+      // Delegate burn
+      //-----
+      deployer.deploy(BurnableERC20, co2knCap)  .then( tkn => {
+      deployer.deploy(TR)                       .then( tr => {
+      deployer.deploy(BSB, tr.address, minStake).then( bsb => {
+      deployer.deploy(QD, bsb.address)          .then( qd => {
+         //const rewardContract = Reward.at(rewardByBlock.address)
+         rewardByBlockInstance.set(qd.address)
+
+         // QD contract needs ownership of BSB
+         bsb.transferOwnership(qd.address)
+         // Register co2kn in token registry
+         tr.setToken('test', tkn.address)
+         // Transfer ownership to personal account for testing
+         tkn.transferOwnership(accounts[0])
+      })
+      })
+      })
+      })
+      //-----
+
+
 
       console.log(
         '\nDone. ADDRESSES:',

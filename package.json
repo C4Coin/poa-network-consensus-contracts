@@ -9,6 +9,9 @@
   },
   "author": "Roman Storm, Viktor Baranov, Vadim Arasev",
   "license": "MIT",
+  "dependencies": {
+    "openzeppelin-solidity": "1.9.0"
+  },
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
@@ -21,6 +24,5 @@
     "solidity-flattener": "github:poanetwork/solidity-flattener#master",
     "truffle": "^4.1.14",
     "web3": "^1.0.0-beta.36"
-  },
-  "dependencies": {}
+  }
 }
