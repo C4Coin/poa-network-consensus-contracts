@@ -1,3 +1,14 @@
+// Delegate burn
+// ----
+const QD = artifacts.require('QueueDelegate')
+const BSB = artifacts.require('BurnableStakeBank')
+const TR  = artifacts.require('TokenRegistry')
+const BurnableERC20 = artifacts.require('BurnableERC20')
+const co2knCap = 100000
+const minStake = 1
+// ----
+
+
 const fs = require('fs');
 const moment = require('moment');
 const solc = require('solc');
@@ -13,17 +24,6 @@ const VotingToManageEmissionFunds = artifacts.require("./VotingToManageEmissionF
 const EmissionFunds = artifacts.require("./EmissionFunds");
 const EternalStorageProxy = artifacts.require("./eternal-storage/EternalStorageProxy.sol");
 const Web3 = require('web3')
-
-// Delegate burn
-// ----
-const QD = artifacts.require('QueueDelegate')
-const BSB = artifacts.require('BurnableStakeBank')
-const TR  = artifacts.require('TokenRegistry')
-const BurnableERC20 = artifacts.require('BurnableERC20')
-const co2knCap = 100000
-const minStake = 1
-// ----
-
 
 const getWeb3Latest = () => {
  const web3Latest = new Web3(web3.currentProvider)
@@ -165,26 +165,16 @@ module.exports = function(deployer, network, accounts) {
 
       // Deploy RewardByBlock
       const contractsFolder = 'contracts/';
-
       let rewardByBlockCode = fs.readFileSync(`${contractsFolder}RewardByBlock.sol`).toString();
       rewardByBlockCode = rewardByBlockCode.replace('emissionFunds = 0x0000000000000000000000000000000000000000', `emissionFunds = ${emissionFunds.address}`);
       const rewardByBlockCompiled = await compileContract(contractsFolder, 'RewardByBlock', rewardByBlockCode);
       const rewardByBlockBytecode = `0x${rewardByBlockCompiled.bytecode}`;
       const rewardByBlockGasEstimate = web3.eth.estimateGas({data: rewardByBlockBytecode});
       const rewardByBlockImpl = web3.eth.contract(rewardByBlockCompiled.abi);
-      // const rewardByBlockImplAddress = await getRewardByBlockAddress(rewardByBlockBytecode, rewardByBlockCompiled.abi, rewardByBlockGasEstimate)
-      /**/
-
-      // Hard coded reward contract
-      // ---
-      const rewardByBlockImplAddress = '0x000000000000000000000000000000000000000A'
-      // ---
-
-       /*
+      const rewardByBlockImplAddress = await getRewardByBlockAddress(rewardByBlockBytecode, rewardByBlockCompiled.abi, rewardByBlockGasEstimate)
       if (!rewardByBlockImplAddress) {
         throw new Error('Cannot deploy RewardByBlock');
       }
-      */
       rewardByBlock = await EternalStorageProxy.new(
         proxyStorage.address,
         rewardByBlockImplAddress
@@ -241,8 +231,8 @@ module.exports = function(deployer, network, accounts) {
       deployer.deploy(TR)                       .then( tr => {
       deployer.deploy(BSB, tr.address, minStake).then( bsb => {
       deployer.deploy(QD, bsb.address)          .then( qd => {
-         const rewardContract = RewardByBlockImpl.at(rewardByBlockImplAddress)
-         rewardContract.set(qd.address)
+         //const rewardContract = RewardByBlockImpl.at(rewardByBlockImplAddress)
+         rewardByBlockInstance.set(qd.address)
 
          // QD contract needs ownership of BSB
          bsb.transferOwnership(qd.address)
@@ -255,8 +245,6 @@ module.exports = function(deployer, network, accounts) {
       })
       })
       //-----
-
-
 
       console.log(
         '\nDone. ADDRESSES:',
@@ -289,28 +277,28 @@ module.exports = function(deployer, network, accounts) {
   }
 };
 
-// function getRewardByBlockAddress(bytecode, abi, estimatedGas) {
-//   return new Promise((resolve, reject) => {
-//     const deployOpts = {
-//       data: bytecode,
-//     }
-//     const sendOpts = {
-//       from: web3.eth.coinbase,
-//       gas: estimatedGas
-//     }
-//     const web3Latest = getWeb3Latest()
-//     const contractInstance = new web3Latest.eth.Contract(abi)
-//     const deploy = contractInstance.deploy(deployOpts)
-//     deploy.send(sendOpts)
-//     .on('receipt', async (receipt) => {
-//       resolve(receipt.contractAddress)
-//     })
-//     .on('error', async (err) => {
-//       console.log(err)
-//       reject(err)
-//     })
-//   })
-// }
+function getRewardByBlockAddress(bytecode, abi, estimatedGas) {
+  return new Promise((resolve, reject) => {
+    const deployOpts = {
+      data: bytecode,
+    }
+    const sendOpts = {
+      from: web3.eth.coinbase,
+      gas: estimatedGas
+    }
+    const web3Latest = getWeb3Latest()
+    const contractInstance = new web3Latest.eth.Contract(abi)
+    const deploy = contractInstance.deploy(deployOpts)
+    deploy.send(sendOpts)
+    .on('receipt', async (receipt) => {
+      resolve(receipt.contractAddress)
+    })
+    .on('error', async (err) => {
+      console.log(err)
+      reject(err)
+    })
+  })
+}
 
 async function compileContract(dir, contractName, contractCode) {
   const compiled = solc.compile({
@@ -338,3 +326,4 @@ async function compileContract(dir, contractName, contractCode) {
 
 // SAVE_TO_FILE=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
 // SAVE_TO_FILE=true DEPLOY_POA=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
+
