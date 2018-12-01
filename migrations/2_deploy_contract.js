@@ -88,7 +88,7 @@ module.exports = function(deployer, network, accounts) {
       );
       keysManager = KeysManager.at(keysManager.address);
       await keysManager.init(previousKeysManager);
-      
+
       // Deploy BallotsStorage
       ballotsStorage = await BallotsStorage.new();
       ballotsStorageImplAddress = ballotsStorage.address;
@@ -165,19 +165,18 @@ module.exports = function(deployer, network, accounts) {
 
       // Deploy RewardByBlock
       const contractsFolder = 'contracts/';
-       /*
+
       let rewardByBlockCode = fs.readFileSync(`${contractsFolder}RewardByBlock.sol`).toString();
       rewardByBlockCode = rewardByBlockCode.replace('emissionFunds = 0x0000000000000000000000000000000000000000', `emissionFunds = ${emissionFunds.address}`);
       const rewardByBlockCompiled = await compileContract(contractsFolder, 'RewardByBlock', rewardByBlockCode);
       const rewardByBlockBytecode = `0x${rewardByBlockCompiled.bytecode}`;
       const rewardByBlockGasEstimate = web3.eth.estimateGas({data: rewardByBlockBytecode});
       const rewardByBlockImpl = web3.eth.contract(rewardByBlockCompiled.abi);
-      const rewardByBlockImplAddress = await getRewardByBlockAddress(rewardByBlockBytecode, rewardByBlockCompiled.abi, rewardByBlockGasEstimate)
-      */
+      // const rewardByBlockImplAddress = await getRewardByBlockAddress(rewardByBlockBytecode, rewardByBlockCompiled.abi, rewardByBlockGasEstimate)
+      /**/
 
       // Hard coded reward contract
       // ---
-      const rewardByBlockImpl = web3.eth.contract(rewardByBlockCompiled.abi);
       const rewardByBlockImplAddress = '0x000000000000000000000000000000000000000A'
       // ---
 
@@ -290,28 +289,28 @@ module.exports = function(deployer, network, accounts) {
   }
 };
 
-function getRewardByBlockAddress(bytecode, abi, estimatedGas) {
-  return new Promise((resolve, reject) => {
-    const deployOpts = {
-      data: bytecode,
-    }
-    const sendOpts = {
-      from: web3.eth.coinbase,
-      gas: estimatedGas
-    }
-    const web3Latest = getWeb3Latest()
-    const contractInstance = new web3Latest.eth.Contract(abi)
-    const deploy = contractInstance.deploy(deployOpts)
-    deploy.send(sendOpts)
-    .on('receipt', async (receipt) => {
-      resolve(receipt.contractAddress)
-    })
-    .on('error', async (err) => {
-      console.log(err)
-      reject(err)
-    })
-  })
-}
+// function getRewardByBlockAddress(bytecode, abi, estimatedGas) {
+//   return new Promise((resolve, reject) => {
+//     const deployOpts = {
+//       data: bytecode,
+//     }
+//     const sendOpts = {
+//       from: web3.eth.coinbase,
+//       gas: estimatedGas
+//     }
+//     const web3Latest = getWeb3Latest()
+//     const contractInstance = new web3Latest.eth.Contract(abi)
+//     const deploy = contractInstance.deploy(deployOpts)
+//     deploy.send(sendOpts)
+//     .on('receipt', async (receipt) => {
+//       resolve(receipt.contractAddress)
+//     })
+//     .on('error', async (err) => {
+//       console.log(err)
+//       reject(err)
+//     })
+//   })
+// }
 
 async function compileContract(dir, contractName, contractCode) {
   const compiled = solc.compile({
