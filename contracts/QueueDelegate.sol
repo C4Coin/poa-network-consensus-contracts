@@ -17,6 +17,8 @@ contract QueueDelegate {// is IDelegate {
 
     // Returns address of staker that was burned for
     function burnAllForNext () public returns (address) {
+        if (tail == address(0)) return tail;
+
         address headCpy = tail; // Copy head because it may change after burn
         burn(stakers[headCpy].amount, stakers[headCpy].token_id);
         return headCpy;
@@ -112,6 +114,9 @@ contract QueueDelegate {// is IDelegate {
         if ( stakers[prev_id].exists ) {
             stakers[prev_id].next = address(0);
             tail = prev_id;
+        }
+        else {
+            tail = address(0);
         }
 
 
