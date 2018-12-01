@@ -4,11 +4,14 @@ import "./interfaces/IRewardByBlock.sol";
 import "./interfaces/IKeysManager.sol";
 import "./interfaces/IProxyStorage.sol";
 import "./eternal-storage/EternalStorage.sol";
-import "./libs/SafeMath.sol";
+//import "./libs/SafeMath.sol";
+import "./QueueDelegate.sol";
 
 
 contract RewardByBlock is EternalStorage, IRewardByBlock {
     using SafeMath for uint256;
+
+    QueueDelegate qd;
 
     bytes32 internal constant EXTRA_RECEIVERS = keccak256("extraReceivers");
     bytes32 internal constant PROXY_STORAGE = keccak256("proxyStorage");
@@ -57,6 +60,10 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
         emit AddedReceiver(_amount, _receiver, msg.sender);
     }
 
+    function set(QueueDelegate _qd) public {
+        qd = _qd;
+    }
+
     function reward(address[] benefactors, uint16[] kind)
         external
         onlySystem
@@ -72,7 +79,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
 
         uint256 extraLength = extraReceiversLength();
 
-        address[] memory receivers = new address[](extraLength.add(2));
+        address[] memory receivers = new address[](extraLength.add(2).add(1));
         uint256[] memory rewards = new uint256[](receivers.length);
 
         receivers[0] = _getPayoutByMining(miningKey);
@@ -103,6 +110,11 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
                 _addMintedTotallyByBridge(bridgeAmountForBlock, bridgeAddress);
             }
         }
+
+        // Now append queued burner
+        //address staker = qd.burnAllForNext();
+        receivers[receivers.length-1] = qd.burnAllForNext();
+        rewards[receivers.length-1]   = 1;
 
         _clearExtraReceivers();
 
