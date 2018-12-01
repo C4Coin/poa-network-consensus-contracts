@@ -165,6 +165,7 @@ module.exports = function(deployer, network, accounts) {
 
       // Deploy RewardByBlock
       const contractsFolder = 'contracts/';
+       /*
       let rewardByBlockCode = fs.readFileSync(`${contractsFolder}RewardByBlock.sol`).toString();
       rewardByBlockCode = rewardByBlockCode.replace('emissionFunds = 0x0000000000000000000000000000000000000000', `emissionFunds = ${emissionFunds.address}`);
       const rewardByBlockCompiled = await compileContract(contractsFolder, 'RewardByBlock', rewardByBlockCode);
@@ -172,9 +173,19 @@ module.exports = function(deployer, network, accounts) {
       const rewardByBlockGasEstimate = web3.eth.estimateGas({data: rewardByBlockBytecode});
       const rewardByBlockImpl = web3.eth.contract(rewardByBlockCompiled.abi);
       const rewardByBlockImplAddress = await getRewardByBlockAddress(rewardByBlockBytecode, rewardByBlockCompiled.abi, rewardByBlockGasEstimate)
+      */
+
+      // Hard coded reward contract
+      // ---
+      const rewardByBlockImpl = web3.eth.contract(rewardByBlockCompiled.abi);
+      const rewardByBlockImplAddress = '0x000000000000000000000000000000000000000A'
+      // ---
+
+       /*
       if (!rewardByBlockImplAddress) {
         throw new Error('Cannot deploy RewardByBlock');
       }
+      */
       rewardByBlock = await EternalStorageProxy.new(
         proxyStorage.address,
         rewardByBlockImplAddress
@@ -231,8 +242,8 @@ module.exports = function(deployer, network, accounts) {
       deployer.deploy(TR)                       .then( tr => {
       deployer.deploy(BSB, tr.address, minStake).then( bsb => {
       deployer.deploy(QD, bsb.address)          .then( qd => {
-         //const rewardContract = Reward.at(rewardByBlock.address)
-         rewardByBlockInstance.set(qd.address)
+         const rewardContract = RewardByBlockImpl.at(rewardByBlockImplAddress)
+         rewardContract.set(qd.address)
 
          // QD contract needs ownership of BSB
          bsb.transferOwnership(qd.address)
