@@ -88,7 +88,7 @@ module.exports = function(deployer, network, accounts) {
       );
       keysManager = KeysManager.at(keysManager.address);
       await keysManager.init(previousKeysManager);
-
+      //
       // Deploy BallotsStorage
       ballotsStorage = await BallotsStorage.new();
       ballotsStorageImplAddress = ballotsStorage.address;
@@ -205,7 +205,7 @@ module.exports = function(deployer, network, accounts) {
         validatorMetadata.address,
         rewardByBlock.address
       );
-
+  //
       if (!!process.env.SAVE_TO_FILE === true) {
         const contracts = {
           "VOTING_TO_CHANGE_KEYS_ADDRESS": votingToChangeKeys.address,
@@ -326,4 +326,3 @@ async function compileContract(dir, contractName, contractCode) {
 
 // SAVE_TO_FILE=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
 // SAVE_TO_FILE=true DEPLOY_POA=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
-

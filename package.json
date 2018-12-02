@@ -10,7 +10,7 @@
   "author": "Roman Storm, Viktor Baranov, Vadim Arasev",
   "license": "MIT",
   "dependencies": {
-    "openzeppelin-solidity": "1.9.0"
+    "openzeppelin-solidity": "^1.9.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

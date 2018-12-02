@@ -4,14 +4,14 @@ import "./interfaces/IRewardByBlock.sol";
 import "./interfaces/IKeysManager.sol";
 import "./interfaces/IProxyStorage.sol";
 import "./eternal-storage/EternalStorage.sol";
-//import "./libs/SafeMath.sol";
-import "./QueueDelegate.sol";
+import "./libs/SafeMath.sol";
+import "./IQueueDelegate.sol";
 
 
 contract RewardByBlock is EternalStorage, IRewardByBlock {
     using SafeMath for uint256;
 
-    QueueDelegate qd;
+    IQueueDelegate qd;
 
     bytes32 internal constant EXTRA_RECEIVERS = keccak256("extraReceivers");
     bytes32 internal constant PROXY_STORAGE = keccak256("proxyStorage");
@@ -26,7 +26,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
 
     // solhint-disable const-name-snakecase
     // These values must be changed before deploy
-    uint256 public constant blockRewardAmount = 1 ether; 
+    uint256 public constant blockRewardAmount = 1 ether;
     uint256 public constant emissionFundsAmount = 1 ether;
     address public constant emissionFunds = 0x0000000000000000000000000000000000000000;
     uint256 public constant bridgesAllowedLength = 3;
@@ -60,7 +60,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
         emit AddedReceiver(_amount, _receiver, msg.sender);
     }
 
-    function set(QueueDelegate _qd) public {
+    function set(IQueueDelegate _qd) public {
         qd = _qd;
     }
 
@@ -88,7 +88,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
         rewards[1] = emissionFundsAmount;
 
         uint256 i;
-        
+
         for (i = 0; i < extraLength; i++) {
             address extraAddress = extraReceiverByIndex(i);
             uint256 extraAmount = extraReceiverAmount(extraAddress);
@@ -119,7 +119,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
         _clearExtraReceivers();
 
         emit Rewarded(receivers, rewards);
-    
+
         return (receivers, rewards);
     }
 
@@ -219,7 +219,7 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
 
     function _isBridgeContract(address _addr) private pure returns(bool) {
         address[bridgesAllowedLength] memory bridges = bridgesAllowed();
-        
+
         for (uint256 i = 0; i < bridges.length; i++) {
             if (_addr == bridges[i]) {
                 return true;
