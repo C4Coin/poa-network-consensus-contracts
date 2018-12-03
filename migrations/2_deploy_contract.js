@@ -206,6 +206,25 @@ module.exports = function(deployer, network, accounts) {
         rewardByBlock.address
       );
 
+      if (!!process.env.SAVE_TO_FILE === true) {
+        const contracts = {
+          "VOTING_TO_CHANGE_KEYS_ADDRESS": votingToChangeKeys.address,
+          "VOTING_TO_CHANGE_MIN_THRESHOLD_ADDRESS": votingToChangeMinThreshold.address,
+          "VOTING_TO_CHANGE_PROXY_ADDRESS": votingToChangeProxyAddress.address,
+          "VOTING_TO_MANAGE_EMISSION_FUNDS_ADDRESS": votingToManageEmissionFunds.address,
+          "BALLOTS_STORAGE_ADDRESS": ballotsStorage.address,
+          "KEYS_MANAGER_ADDRESS": keysManager.address,
+          "METADATA_ADDRESS": validatorMetadata.address,
+          "PROXY_ADDRESS": proxyStorage.address,
+          "POA_ADDRESS": poaNetworkConsensusAddress,
+          "EMISSION_FUNDS_ADDRESS": emissionFunds.address,
+          "REWARD_BY_BLOCK_ADDRESS": rewardByBlock.address,
+          "MOC": masterOfCeremony,
+        };
+
+        fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2));
+      }
+
       // Delegate burn
       //-----
       deployer.deploy(BurnableERC20, co2knCap)  .then( tkn => {
@@ -228,26 +247,14 @@ module.exports = function(deployer, network, accounts) {
          console.log("TKN ADDRESS " + tkn.address)
 
          if (!!process.env.SAVE_TO_FILE === true) {
-           const contracts = {
-             "VOTING_TO_CHANGE_KEYS_ADDRESS": votingToChangeKeys.address,
-             "VOTING_TO_CHANGE_MIN_THRESHOLD_ADDRESS": votingToChangeMinThreshold.address,
-             "VOTING_TO_CHANGE_PROXY_ADDRESS": votingToChangeProxyAddress.address,
-             "VOTING_TO_MANAGE_EMISSION_FUNDS_ADDRESS": votingToManageEmissionFunds.address,
-             "BALLOTS_STORAGE_ADDRESS": ballotsStorage.address,
-             "KEYS_MANAGER_ADDRESS": keysManager.address,
-             "METADATA_ADDRESS": validatorMetadata.address,
-             "PROXY_ADDRESS": proxyStorage.address,
-             "POA_ADDRESS": poaNetworkConsensusAddress,
-             "EMISSION_FUNDS_ADDRESS": emissionFunds.address,
-             "REWARD_BY_BLOCK_ADDRESS": rewardByBlock.address,
-             "MOC": masterOfCeremony,
+           const addrs = {
              "QD": qd.address,
              "BSB": bsb.address,
              "TEST_TOKEN": tkn.address,
              "TOKEN_REGISTRY": tr.address
            };
 
-           fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2));
+           fs.writeFileSync('./burn_contracts.json', JSON.stringify(addrs, null, 2));
          }
       })
       })
