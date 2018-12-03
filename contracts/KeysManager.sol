@@ -13,16 +13,16 @@ contract KeysManager is EternalStorage, IKeysManager {
 
     bytes32 internal constant INIT_DISABLED =
         keccak256("initDisabled");
-    
+
     bytes32 internal constant INITIAL_KEYS_COUNT =
         keccak256("initialKeysCount");
-    
+
     bytes32 internal constant OWNER =
         keccak256("owner");
-    
+
     bytes32 internal constant PREVIOUS_KEYS_MANAGER =
         keccak256("previousKeysManager");
-    
+
     bytes32 internal constant PROXY_STORAGE =
         keccak256("proxyStorage");
 
@@ -43,7 +43,7 @@ contract KeysManager is EternalStorage, IKeysManager {
     event MiningKeyChanged(address key, string action);
     event VotingKeyChanged(address key, address indexed miningKey, string action);
     event PayoutKeyChanged(address key, address indexed miningKey, string action);
-    
+
     event ValidatorInitialized(
         address indexed miningKey,
         address indexed votingKey,
@@ -55,7 +55,7 @@ contract KeysManager is EternalStorage, IKeysManager {
         uint256 time,
         uint256 initialKeysCount
     );
-    
+
     event Migrated(string name, address key);
 
     modifier onlyOwner() {
@@ -87,10 +87,10 @@ contract KeysManager is EternalStorage, IKeysManager {
         if (_currentKey == address(0)) {
             return false;
         }
-        
+
         address currentKey = _currentKey;
         uint256 maxDeep = maxOldMiningKeysDeepCheck();
-        
+
         for (uint256 i = 0; i < maxDeep; i++) {
             address oldMiningKey = getMiningKeyHistory(currentKey);
             if (oldMiningKey == address(0)) {
@@ -101,7 +101,7 @@ contract KeysManager is EternalStorage, IKeysManager {
             }
             currentKey = oldMiningKey;
         }
-        
+
         return false;
     }
 

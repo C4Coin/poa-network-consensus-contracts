@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import './IDelegate.sol';
+import './IQueueDelegate.sol';
 //import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
 import './PoB/BurnableERC20.sol';
 import './PoB/BurnableStakeBank.sol';
 
-contract QueueDelegate {// is IDelegate {
+contract QueueDelegate is IQueueDelegate {
     mapping (address => Staker) public stakers;
     //BurnableERC20 token;
     BurnableStakeBank bsb;
@@ -124,4 +124,3 @@ contract QueueDelegate {// is IDelegate {
         length -= 1;
     }
 }
-
