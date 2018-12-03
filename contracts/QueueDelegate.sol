@@ -1,17 +1,18 @@
 pragma solidity ^0.4.24;
 
 import './IQueueDelegate.sol';
+//import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
 import './PoB/BurnableERC20.sol';
 import './PoB/BurnableStakeBank.sol';
 
 contract QueueDelegate is IQueueDelegate {
-    mapping (address => Staker) public stakers;
+    mapping (address => Staker) stakers;
     //BurnableERC20 token;
     BurnableStakeBank bsb;
 
     constructor (address _bsbAddress) {
         //token = _token;
-        bsb = BurnableStakeBank(_bsbAddress);
+        /* bsb   = BurnableStakeBank(_bsbAddress); */
     }
 
     // Returns address of staker that was burned for
@@ -32,46 +33,9 @@ contract QueueDelegate is IQueueDelegate {
         }
     }
 
-    function join (uint256 stake_amount, bytes token_id) public {
-        // Transfer staker funds to delegate account
-        // token.transferFrom(msg.sender, this, stake_amount);
-        bsb.stakeFor(msg.sender, stake_amount, token_id);
-
-        // Add staker to bstake urn list
-        add(msg.sender, stake_amount, token_id);
-    }
-
-    /*
-    function withdraw (bytes token_id) public {
-        //require( stakers[msg.sender].exists == true );
-
-        withdrawSomeFor(msg.sender, stakers[msg.sender].amount, token_id );
-    }
-
-    function withdrawSomeFor (address user, uint256 stake_amount, bytes token_id) public {
-        //require( stakers[msg.sender].exists == true );
-        require( stakers[msg.sender].amount >= stake_amount );
-
-        // Return staker's money
-        bsb.unstakeFor(user, stake_amount, token_id);
-
-        // TODO: Should not track stake amount in QD contract since it's already tracked in BSB
-
-        // Subtract amount or remove staker from burn list altogether
-        if ( stakers[ msg.sender ].amount <= stake_amount )
-            remove( msg.sender );
-        else
-            stakers[ msg.sender ].amount -= stake_amount; // Make this a safe subtract
-
-        // Decrement
-        length -= 1;
-    }
-    */
-
     function get (address a) view public returns (uint256) {
         return stakers[a].amount;
     }
-
 
     //
     // Linked list impl
@@ -84,27 +48,9 @@ contract QueueDelegate is IQueueDelegate {
         bool exists;
     }
 
-    uint256 public length = 0;
+    uint256 length;
     address head;
     address tail;
-
-    function add(address _addr, uint256 _amount, bytes _tokenid) private {
-        stakers[_addr] = Staker({
-            next: head,
-            prev: address(0),
-            amount: _amount,
-            token_id: _tokenid,
-            exists: true
-        });
-
-        if ( stakers[head].exists )
-            stakers[head].prev = _addr;
-        else
-            tail = _addr;
-
-        head = _addr;
-        length += 1;
-    }
 
     // ONLY to be used as a queue (remove tail element of list)
     function remove(address _addr) private {
@@ -117,7 +63,6 @@ contract QueueDelegate is IQueueDelegate {
         else {
             tail = address(0);
         }
-
 
         delete stakers[_addr];
         length -= 1;

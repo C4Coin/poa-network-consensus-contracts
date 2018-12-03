@@ -1,6 +1,6 @@
 // Delegate burn
 // ----
-// const QD = artifacts.require('QueueDelegate')
+const QD = artifacts.require('QueueDelegate')
 const BSB = artifacts.require('BurnableStakeBank')
 const TR  = artifacts.require('TokenRegistry')
 const BurnableERC20 = artifacts.require('BurnableERC20')
@@ -235,7 +235,7 @@ module.exports = function(deployer, network, accounts) {
       let burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
       let burnableStakeBankImplAddress = burnableStakeBank.address;
 
-      // let queueDelegate = await QD.new(burnableStakeBankImplAddress);
+      let queueDelegate = await QD.new(burnableStakeBankImplAddress);
       // let queueDelegateImplAddress = queueDelegate.address;
       // await rewardByBlockInstance.set(queueDelegateImplAddress);
       //
