@@ -24,7 +24,6 @@ import './IBurnableERC20.sol';
 import './TokenRegistry.sol';
 
 
-// @title Contract to store stake (checkpoint history total staked at block) and burn tokens
 contract BurnableStakeBank is Lockable {
     using SafeMath for uint256;
 
@@ -41,31 +40,16 @@ contract BurnableStakeBank is Lockable {
     mapping (address => Checkpoint[]) public stakesFor;
     mapping (address => Checkpoint[]) public burnsFor;
 
-    /**
-     * @param _tokenRegistry Token registry that contains white listed tokens.
-     * @param _minimumStake Min threshold of amount that can be staked.
-     */
-    constructor(TokenRegistry _tokenRegistry, uint256 _minimumStake) public {
-        require(address(_tokenRegistry) != 0x0);
-        tokenRegistry = _tokenRegistry;
+    constructor(address _tokenRegistryAddress, uint256 _minimumStake) public {
+        require(_tokenRegistryAddress != 0x0);
+        tokenRegistry = TokenRegistry(_tokenRegistryAddress);
         minimumStake = _minimumStake;
     }
 
-    /**
-     * @notice Stakes a certain amount of tokens.
-     * @param amount Amount of tokens to stake.
-     * @param data Data field used for signalling in more complex staking applications.
-     */
     function stake(uint256 amount, bytes data) public {
         stakeFor(msg.sender, amount, data);
     }
 
-    /**
-     * @notice Stakes a certain amount of tokens for another user.
-     * @param user Address of the user to stake for.
-     * @param amount Amount of tokens to stake.
-     * @param __data Data field used for signalling in more complex staking applications.
-     */
     function stakeFor(address user, uint256 amount, bytes __data) public onlyWhenUnlocked {
         require( amount >= minimumStake );
 
@@ -81,12 +65,6 @@ contract BurnableStakeBank is Lockable {
         require(token.transferFrom(user, address(this), amount));
     }
 
-    /**
-     * @notice Burns an amount of staked tokens for another user
-     * @param user Address of the user to burn for.
-     * @param burnAmount Amount of tokens to burn.
-     * @param __data Data field used for signalling in more complex staking applications.
-     */
     function burnFor(address user, uint256 burnAmount, bytes __data) public onlyWhenUnlocked onlyOwner {
         require(totalStakedFor(user) >= burnAmount);
 
@@ -106,11 +84,6 @@ contract BurnableStakeBank is Lockable {
         updateCheckpointAtNow(stakeHistory, burnAmount, true);
     }
 
-    /**
-     * @notice Unstakes a certain amount of tokens.
-     * @param amount Amount of tokens to unstake.
-     * @param __data Data field used for signalling in more complex staking applications.
-     */
     function unstakeFor(address user, uint256 amount, bytes __data) public {
         require(totalStakedFor(user) >= amount);
 
@@ -129,11 +102,6 @@ contract BurnableStakeBank is Lockable {
         require(token.transfer(user, amount));
     }
 
-    /**
-     * @notice Returns total tokens staked for address.
-     * @param addr Address to check.
-     * @return amount of tokens staked.
-     */
     function totalStakedFor(address addr) public view returns (uint256) {
         Checkpoint[] storage stakes = stakesFor[addr];
 
@@ -144,43 +112,22 @@ contract BurnableStakeBank is Lockable {
         return stakes[stakes.length-1].amount;
     }
 
-    /**
-     * @notice Returns total tokens staked.
-     * @return amount of tokens staked.
-     */
     function totalStaked() public view returns (uint256) {
         return totalStakedAt(block.number);
     }
 
-    /**
-     * @notice Returns total tokens burned.
-     * @return amount of tokens burned.
-     */
     function totalBurned() public view returns (uint256) {
         return totalBurnedAt(block.number);
     }
 
-    /**
-     * @notice Returns true if history related functions are implemented.
-     * @return Bool Are history related functions implemented?
-     */
     function supportsHistory() public pure returns (bool) {
         return true;
     }
 
-    /**
-     * @notice Returns the token address.
-     * @return Address of token.
-     */
     function token() public view returns (address) {
         return address(0);
     }
 
-    /**
-     * @notice Returns last block address staked at.
-     * @param addr Address to check.
-     * @return block number of last stake.
-     */
     function lastStakedFor(address addr) public view returns (uint256) {
         Checkpoint[] storage stakes = stakesFor[addr];
 
@@ -191,50 +138,23 @@ contract BurnableStakeBank is Lockable {
         return stakes[stakes.length-1].at;
     }
 
-    /**
-     * @notice Returns total amount of tokens staked at block for address.
-     * @param addr Address to check.
-     * @param blockNumber Block number to check.
-     * @return amount of tokens staked.
-     */
     function totalStakedForAt(address addr, uint256 blockNumber) public view returns (uint256) {
         return stakedAt(stakesFor[addr], blockNumber);
     }
 
-    /**
-     * @notice Returns total amount of tokens burned at block for address.
-     * @param addr Address to check.
-     * @param blockNumber Block number to check.
-     * @return amount of tokens burned.
-     */
     function totalBurnedForAt(address addr, uint256 blockNumber) public view returns (uint256) {
         return stakedAt(burnsFor[addr], blockNumber);
     }
 
-    /**
-     * @notice Returns the total tokens staked at block.
-     * @param blockNumber Block number to check.
-     * @return amount of tokens staked.
-     */
+
     function totalStakedAt(uint256 blockNumber) public view returns (uint256) {
         return stakedAt(stakeHistory, blockNumber);
     }
 
-    /**
-     * @notice Returns the total tokens burned at block.
-     * @param blockNumber Block number to check.
-     * @return amount of tokens burned.
-     */
     function totalBurnedAt(uint256 blockNumber) public view returns (uint256) {
         return stakedAt(burnHistory, blockNumber);
     }
 
-    /**
-     * @notice Updates the last element of the checkpoint history with amount staked or unstaked
-     * @param history Checkpoint state array which stores a block number and amount
-     * @param amount Amount of tokens to stake or unstake
-     * @param isUnstake flag to represent whether to remove staked amount in checkpoint
-     */
     function updateCheckpointAtNow(Checkpoint[] storage history, uint256 amount, bool isUnstake) internal {
         uint256 length = history.length;
         if (length == 0) {
@@ -257,11 +177,6 @@ contract BurnableStakeBank is Lockable {
         }
     }
 
-    /**
-     * @notice Gets amount staked given a checkpoint history and the block number
-     * @param history Checkpoint state array which stores a block number and amount
-     * @param blockNumber the block number at which a previous stake was set
-     */
     function stakedAt(Checkpoint[] storage history, uint256 blockNumber) internal view returns (uint256) {
         uint256 length = history.length;
 
@@ -297,4 +212,3 @@ contract BurnableStakeBank is Lockable {
         return out;
    }
 }
-

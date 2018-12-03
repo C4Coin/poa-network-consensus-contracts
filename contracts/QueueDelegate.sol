@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import './IQueueDelegate.sol';
-//import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol';
 import './PoB/BurnableERC20.sol';
 import './PoB/BurnableStakeBank.sol';
 
@@ -10,9 +9,9 @@ contract QueueDelegate is IQueueDelegate {
     //BurnableERC20 token;
     BurnableStakeBank bsb;
 
-    constructor (BurnableStakeBank _bsb) {
+    constructor (address _bsbAddress) {
         //token = _token;
-        bsb   = _bsb;
+        bsb = BurnableStakeBank(_bsbAddress);
     }
 
     // Returns address of staker that was burned for

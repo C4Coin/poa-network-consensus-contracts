@@ -60,8 +60,8 @@ contract RewardByBlock is EternalStorage, IRewardByBlock {
         emit AddedReceiver(_amount, _receiver, msg.sender);
     }
 
-    function set(IQueueDelegate _qd) public {
-        qd = _qd;
+    function set(address _qdAddress) public {
+        /* qd = IQueueDelegate(_qdAddress); */
     }
 
     function reward(address[] benefactors, uint16[] kind)

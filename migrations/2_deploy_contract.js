@@ -1,6 +1,6 @@
 // Delegate burn
 // ----
-const QD = artifacts.require('QueueDelegate')
+// const QD = artifacts.require('QueueDelegate')
 const BSB = artifacts.require('BurnableStakeBank')
 const TR  = artifacts.require('TokenRegistry')
 const BurnableERC20 = artifacts.require('BurnableERC20')
@@ -33,7 +33,7 @@ const getWeb3Latest = () => {
 module.exports = function(deployer, network, accounts) {
   if (network === 'sokol') {
     let masterOfCeremony = process.env.MASTER_OF_CEREMONY;
-    let poaNetworkConsensusAddress = process.env.POA_NETWORK_CONSENSUS_ADDRESS;
+    let poaNetworkConsensusAddress = process.env.POA_NETWORK_CONSENSUS_ADDRESS || "0x0000000000000000000000000000000000000000";
     let previousKeysManager = process.env.OLD_KEYSMANAGER || "0x0000000000000000000000000000000000000000";
     let demoMode = !!process.env.DEMO === true;
     let poaNetworkConsensus, emissionFunds;
@@ -68,7 +68,7 @@ module.exports = function(deployer, network, accounts) {
         poaNetworkConsensus = PoaNetworkConsensus.at(poaNetworkConsensusAddress);
       }
 
-      // Deploy ProxyStorage
+      // // Deploy ProxyStorage
       proxyStorage = await ProxyStorage.new();
       proxyStorageImplAddress = proxyStorage.address;
       proxyStorage = await EternalStorageProxy.new(
@@ -102,7 +102,7 @@ module.exports = function(deployer, network, accounts) {
       } else {
         await ballotsStorage.init([3, 2]);
       }
-
+      //
       // Deploy ValidatorMetadata
       validatorMetadata = await ValidatorMetadata.new();
       validatorMetadataImplAddress = validatorMetadata.address;
@@ -160,10 +160,10 @@ module.exports = function(deployer, network, accounts) {
         votingToManageEmissionFunds.address
       );
 
-      // Deploy EmissionFunds
+      // // Deploy EmissionFunds
       emissionFunds = await EmissionFunds.new(votingToManageEmissionFunds.address);
 
-      // Deploy RewardByBlock
+      // // Deploy RewardByBlock
       const contractsFolder = 'contracts/';
       let rewardByBlockCode = fs.readFileSync(`${contractsFolder}RewardByBlock.sol`).toString();
       rewardByBlockCode = rewardByBlockCode.replace('emissionFunds = 0x0000000000000000000000000000000000000000', `emissionFunds = ${emissionFunds.address}`);
@@ -226,41 +226,39 @@ module.exports = function(deployer, network, accounts) {
       }
 
       // Delegate burn
-      //-----
-      deployer.deploy(BurnableERC20, co2knCap)  .then( tkn => {
-      deployer.deploy(TR)                       .then( tr => {
-      deployer.deploy(BSB, tr.address, minStake).then( bsb => {
-      deployer.deploy(QD, bsb.address)          .then( qd => {
-         //const rewardContract = RewardByBlockImpl.at(rewardByBlockImplAddress)
-         rewardByBlockInstance.set(qd.address)
+      let burnableERC20 = await BurnableERC20.new(co2knCap);
+      let burnableERC20ImplAddress = burnableERC20.address;
 
-         // QD contract needs ownership of BSB
-         bsb.transferOwnership(qd.address)
-         // Register co2kn in token registry
-         tr.setToken('test', tkn.address)
-         // Transfer ownership to personal account for testing
-         tkn.transferOwnership(accounts[0])
+      let tokenRegistry = await TR.new();
+      let tokenRegistryImplAddress = tokenRegistry.address;
 
-         console.log("QD ADDRESS " + qd.address)
-         console.log("BSB ADDRESS " + bsb.address)
-         console.log("TR ADDRESS " + tr.address)
-         console.log("TKN ADDRESS " + tkn.address)
+      let burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
+      let burnableStakeBankImplAddress = burnableStakeBank.address;
 
-         if (!!process.env.SAVE_TO_FILE === true) {
-           const addrs = {
-             "QD": qd.address,
-             "BSB": bsb.address,
-             "TEST_TOKEN": tkn.address,
-             "TOKEN_REGISTRY": tr.address
-           };
+      // let queueDelegate = await QD.new(burnableStakeBankImplAddress);
+      // let queueDelegateImplAddress = queueDelegate.address;
+      // await rewardByBlockInstance.set(queueDelegateImplAddress);
+      //
+      // // QD contract needs ownership of BSB
+      // await burnableStakeBank.transferOwnership(queueDelegateImplAddress)
 
-           fs.writeFileSync('./burn_contracts.json', JSON.stringify(addrs, null, 2));
-         }
-      })
-      })
-      })
-      })
-      //-----
+      // Register co2kn in token registry
+      //    tr.setToken('test', tkn.address)
+
+      // Transfer ownership to personal account for testing
+      //    tkn.transferOwnership(accounts[0])
+
+      //
+      //    if (!!process.env.SAVE_TO_FILE === true) {
+      //      const addrs = {
+      //        "QD": qd.address,
+      //        "BSB": bsb.address,
+      //        "TEST_TOKEN": tkn.address,
+      //        "TOKEN_REGISTRY": tr.address
+      //      };
+      //
+      //      fs.writeFileSync('./burn_contracts.json', JSON.stringify(addrs, null, 2));
+      //    }
 
       console.log(
         '\nDone. ADDRESSES:',
@@ -285,8 +283,12 @@ module.exports = function(deployer, network, accounts) {
   EmissionFunds.address .............................. ${emissionFunds.address}
   RewardByBlock.address (implementation) ............. ${rewardByBlockImplAddress}
   RewardByBlock.address (storage) .................... ${rewardByBlock.address}
+  burnableERC20.address .............................. ${burnableERC20ImplAddress}
+  TR.address ......................................... ${tokenRegistryImplAddress}
+  BSB.address ......................................... ${burnableStakeBankImplAddress}
         `
       )
+      // QD.address ......................................... ${queueDelegateImplAddress}
     }).catch(function(error) {
       console.error(error);
     });

@@ -22,7 +22,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract TokenRegistry is Ownable {
     mapping (bytes32 => address) public tokens;
-    
+
     constructor() public Ownable() {
     }
 
