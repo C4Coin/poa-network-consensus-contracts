@@ -1,14 +1,3 @@
-// Delegate burn
-// ----
-const QD = artifacts.require('QueueDelegate')
-const BSB = artifacts.require('BurnableStakeBank')
-const TR  = artifacts.require('TokenRegistry')
-const BurnableERC20 = artifacts.require('BurnableERC20')
-const co2knCap = 100000
-const minStake = 1
-// ----
-
-
 const fs = require('fs');
 const moment = require('moment');
 const solc = require('solc');
@@ -24,6 +13,16 @@ const VotingToManageEmissionFunds = artifacts.require("./VotingToManageEmissionF
 const EmissionFunds = artifacts.require("./EmissionFunds");
 const EternalStorageProxy = artifacts.require("./eternal-storage/EternalStorageProxy.sol");
 const Web3 = require('web3')
+
+// Delegate burn
+// ----
+// const QD = artifacts.require('./QueueDelegate.sol')
+const BSB = artifacts.require('./PoB/BurnableStakeBank.sol')
+const TR  = artifacts.require('./PoB/TokenRegistry.sol')
+const BurnableERC20 = artifacts.require('./PoB/BurnableERC20.sol')
+const co2knCap = 100000
+const minStake = 1
+// ----
 
 const getWeb3Latest = () => {
  const web3Latest = new Web3(web3.currentProvider)
@@ -222,7 +221,7 @@ module.exports = function(deployer, network, accounts) {
           "MOC": masterOfCeremony,
         };
 
-        fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2));
+        fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2), {encoding:'utf8',flag:'w'});
       }
 
       // Delegate burn
@@ -235,7 +234,7 @@ module.exports = function(deployer, network, accounts) {
       let burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
       let burnableStakeBankImplAddress = burnableStakeBank.address;
 
-      let queueDelegate = await QD.new(burnableStakeBankImplAddress);
+      // let queueDelegate = await QD.new(burnableStakeBankImplAddress);
       // let queueDelegateImplAddress = queueDelegate.address;
       // await rewardByBlockInstance.set(queueDelegateImplAddress);
       //

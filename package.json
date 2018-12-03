@@ -10,16 +10,16 @@
   "author": "Roman Storm, Viktor Baranov, Vadim Arasev",
   "license": "MIT",
   "dependencies": {
-    "openzeppelin-solidity": "^1.9.0"
+    "openzeppelin-solidity": "^1.12.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
-    "ganache-cli": "^6.1.0",
-    "mochawesome": "^3.0.2",
-    "moment": "^2.19.3",
-    "solhint": "^1.2.1",
+    "ganache-cli": "^6.2.3",
+    "mochawesome": "^3.1.1",
+    "moment": "^2.22.2",
+    "solhint": "^1.4.0",
     "solidity-coverage": "^0.5.11",
     "solidity-flattener": "github:poanetwork/solidity-flattener#master",
     "truffle": "^4.1.14",
