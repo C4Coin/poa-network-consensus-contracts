@@ -162,7 +162,7 @@ module.exports = function(deployer, network, accounts) {
       // // Deploy EmissionFunds
       emissionFunds = await EmissionFunds.new(votingToManageEmissionFunds.address);
 
-      // // Deploy RewardByBlock
+      // Deploy RewardByBlock
       const contractsFolder = 'contracts/';
       let rewardByBlockCode = fs.readFileSync(`${contractsFolder}RewardByBlock.sol`).toString();
       rewardByBlockCode = rewardByBlockCode.replace('emissionFunds = 0x0000000000000000000000000000000000000000', `emissionFunds = ${emissionFunds.address}`);
@@ -226,18 +226,12 @@ module.exports = function(deployer, network, accounts) {
 
       // Delegate burn
       const burnableERC20 = await BurnableERC20.new(co2knCap);
-      const burnableERC20ImplAddress = burnableERC20.address;
-
       const tokenRegistry = await TR.new();
-      let tokenRegistryImplAddress = tokenRegistry.address;
+      const burnableStakeBank = await BSB.new(tokenRegistry.address, minStake);
+      const queueDelegate = await QD.new(burnableStakeBank.address);
 
-      const burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
-      const burnableStakeBankImplAddress = burnableStakeBank.address;
-
-      const queueDelegate = await QD.new(burnableStakeBankImplAddress);
-      const queueDelegateImplAddress = queueDelegate.address;
-      // await rewardByBlockInstance.set(queueDelegateImplAddress);
-      //
+      await rewardByBlockInstance.setDelegate.call(queueDelegate.address);
+     
       // QD contract needs ownership of BSB
       // await burnableStakeBank.transferOwnership(queueDelegateImplAddress)
 
@@ -282,10 +276,10 @@ module.exports = function(deployer, network, accounts) {
   EmissionFunds.address .............................. ${emissionFunds.address}
   RewardByBlock.address (implementation) ............. ${rewardByBlockImplAddress}
   RewardByBlock.address (storage) .................... ${rewardByBlock.address}
-  burnableERC20.address .............................. ${burnableERC20ImplAddress}
-  TR.address ......................................... ${tokenRegistryImplAddress}
-  BSB.address ........................................ ${burnableStakeBankImplAddress}
-  QD.address ......................................... ${queueDelegateImplAddress}
+  burnableERC20.address .............................. ${burnableERC20.address}
+  TR.address ......................................... ${tokenRegistry.address}
+  BSB.address ........................................ ${burnableStakeBank.address}
+  QD.address ......................................... ${queueDelegate.address}
         `
       )
     }).catch(function(error) {
