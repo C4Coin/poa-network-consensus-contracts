@@ -16,7 +16,7 @@ const Web3 = require('web3')
 
 // Delegate burn
 // ----
-// const QD = artifacts.require('./QueueDelegate.sol')
+const QD = artifacts.require('./QueueDelegate.sol')
 const BSB = artifacts.require('./PoB/BurnableStakeBank.sol')
 const TR  = artifacts.require('./PoB/TokenRegistry.sol')
 const BurnableERC20 = artifacts.require('./PoB/BurnableERC20.sol')
@@ -225,20 +225,20 @@ module.exports = function(deployer, network, accounts) {
       }
 
       // Delegate burn
-      let burnableERC20 = await BurnableERC20.new(co2knCap);
-      let burnableERC20ImplAddress = burnableERC20.address;
+      const burnableERC20 = await BurnableERC20.new(co2knCap);
+      const burnableERC20ImplAddress = burnableERC20.address;
 
-      let tokenRegistry = await TR.new();
+      const tokenRegistry = await TR.new();
       let tokenRegistryImplAddress = tokenRegistry.address;
 
-      let burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
-      let burnableStakeBankImplAddress = burnableStakeBank.address;
+      const burnableStakeBank = await BSB.new(tokenRegistryImplAddress, minStake);
+      const burnableStakeBankImplAddress = burnableStakeBank.address;
 
-      // let queueDelegate = await QD.new(burnableStakeBankImplAddress);
-      // let queueDelegateImplAddress = queueDelegate.address;
+      const queueDelegate = await QD.new(burnableStakeBankImplAddress);
+      const queueDelegateImplAddress = queueDelegate.address;
       // await rewardByBlockInstance.set(queueDelegateImplAddress);
       //
-      // // QD contract needs ownership of BSB
+      // QD contract needs ownership of BSB
       // await burnableStakeBank.transferOwnership(queueDelegateImplAddress)
 
       // Register co2kn in token registry
@@ -284,10 +284,10 @@ module.exports = function(deployer, network, accounts) {
   RewardByBlock.address (storage) .................... ${rewardByBlock.address}
   burnableERC20.address .............................. ${burnableERC20ImplAddress}
   TR.address ......................................... ${tokenRegistryImplAddress}
-  BSB.address ......................................... ${burnableStakeBankImplAddress}
+  BSB.address ........................................ ${burnableStakeBankImplAddress}
+  QD.address ......................................... ${queueDelegateImplAddress}
         `
       )
-      // QD.address ......................................... ${queueDelegateImplAddress}
     }).catch(function(error) {
       console.error(error);
     });
@@ -343,3 +343,5 @@ async function compileContract(dir, contractName, contractCode) {
 
 // SAVE_TO_FILE=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
 // SAVE_TO_FILE=true DEPLOY_POA=true POA_NETWORK_CONSENSUS_ADDRESS=0x8bf38d4764929064f2d4d3a56520a76ab3df415b MASTER_OF_CEREMONY=0xCf260eA317555637C55F70e55dbA8D5ad8414Cb0 OLD_KEYSMANAGER=0xfc90125492e58dbfe80c0bfb6a2a759c4f703ca8 ./node_modules/.bin/truffle migrate --reset --network sokol
+
+// SAVE_TO_FILE=true MASTER_OF_CEREMONY=0x138cb5bb171846F94bc9bC795d419cB5B28Ab7cA DEPLOY_POA=true ./node_modules/.bin/truffle migrate --reset --network sokol
