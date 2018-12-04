@@ -221,7 +221,7 @@ module.exports = function(deployer, network, accounts) {
           "MOC": masterOfCeremony,
         };
 
-        fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2), {encoding:'utf8',flag:'w'});
+        fs.writeFileSync('./contracts.json', JSON.stringify(contracts, null, 2));
       }
 
       // Delegate burn
@@ -231,27 +231,27 @@ module.exports = function(deployer, network, accounts) {
       const queueDelegate = await QD.new(burnableStakeBank.address);
 
       await rewardByBlockInstance.setDelegate.call(queueDelegate.address);
-     
+
       // QD contract needs ownership of BSB
-      // await burnableStakeBank.transferOwnership(queueDelegateImplAddress)
+      await burnableStakeBank.transferOwnership(queueDelegate.address)
 
       // Register co2kn in token registry
-      //    tr.setToken('test', tkn.address)
+      tokenRegistry.setToken('test', burnableERC20.address)
 
       // Transfer ownership to personal account for testing
-      //    tkn.transferOwnership(accounts[0])
+      burnableERC20.transferOwnership(masterOfCeremony)
 
-      //
-      //    if (!!process.env.SAVE_TO_FILE === true) {
-      //      const addrs = {
-      //        "QD": qd.address,
-      //        "BSB": bsb.address,
-      //        "TEST_TOKEN": tkn.address,
-      //        "TOKEN_REGISTRY": tr.address
-      //      };
-      //
-      //      fs.writeFileSync('./burn_contracts.json', JSON.stringify(addrs, null, 2));
-      //    }
+
+      if (!!process.env.SAVE_TO_FILE === true) {
+        const addrs = {
+          "QD": queueDelegate.address,
+          "BSB": burnableStakeBank.address,
+          "TEST_TOKEN": burnableERC20.address,
+          "TOKEN_REGISTRY": tokenRegistry.address
+        };
+
+        fs.writeFileSync('./burn_contracts.json', JSON.stringify(addrs, null, 2));
+      }
 
       console.log(
         '\nDone. ADDRESSES:',
