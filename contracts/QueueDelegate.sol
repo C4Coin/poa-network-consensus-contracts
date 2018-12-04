@@ -12,7 +12,7 @@ contract QueueDelegate is IQueueDelegate {
 
     constructor (address _bsbAddress) {
         //token = _token;
-        /* bsb   = BurnableStakeBank(_bsbAddress); */
+        bsb   = BurnableStakeBank(_bsbAddress);
     }
 
     // Returns address of staker that was burned for
@@ -33,6 +33,34 @@ contract QueueDelegate is IQueueDelegate {
         }
     }
 
+    function join (uint256 stake_amount, bytes token_id) public {
+        // Transfer staker funds to delegate account
+        // token.transferFrom(msg.sender, this, stake_amount);
+        bsb.stakeFor(msg.sender, stake_amount, token_id);
+        // Add staker to bstake urn list
+        add(msg.sender, stake_amount, token_id);
+    }
+    /*
+    function withdraw (bytes token_id) public {
+        //require( stakers[msg.sender].exists == true );
+        withdrawSomeFor(msg.sender, stakers[msg.sender].amount, token_id );
+    }
+    function withdrawSomeFor (address user, uint256 stake_amount, bytes token_id) public {
+        //require( stakers[msg.sender].exists == true );
+        require( stakers[msg.sender].amount >= stake_amount );
+        // Return staker's money
+        bsb.unstakeFor(user, stake_amount, token_id);
+        // TODO: Should not track stake amount in QD contract since it's already tracked in BSB
+        // Subtract amount or remove staker from burn list altogether
+        if ( stakers[ msg.sender ].amount <= stake_amount )
+            remove( msg.sender );
+        else
+            stakers[ msg.sender ].amount -= stake_amount; // Make this a safe subtract
+        // Decrement
+        length -= 1;
+    }
+    */
+
     function get (address a) view public returns (uint256) {
         return stakers[a].amount;
     }
@@ -48,9 +76,26 @@ contract QueueDelegate is IQueueDelegate {
         bool exists;
     }
 
-    uint256 length;
+    uint256 length = 0;
     address head;
     address tail;
+
+    function add(address _addr, uint256 _amount, bytes _tokenid) private {
+        stakers[_addr] = Staker({
+            next: head,
+            prev: address(0),
+            amount: _amount,
+            token_id: _tokenid,
+            exists: true
+        });
+        if ( stakers[head].exists )
+            stakers[head].prev = _addr;
+        else
+            tail = _addr;
+        head = _addr;
+        length += 1;
+    }
+
 
     // ONLY to be used as a queue (remove tail element of list)
     function remove(address _addr) private {
