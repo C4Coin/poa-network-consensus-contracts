@@ -32,7 +32,7 @@ const getWeb3Latest = () => {
 module.exports = function(deployer, network, accounts) {
   if (network === 'sokol') {
     let masterOfCeremony = process.env.MASTER_OF_CEREMONY;
-    let poaNetworkConsensusAddress = process.env.POA_NETWORK_CONSENSUS_ADDRESS || "0x0000000000000000000000000000000000000000";
+    let poaNetworkConsensusAddress = process.env.POA_NETWORK_CONSENSUS_ADDRESS;
     let previousKeysManager = process.env.OLD_KEYSMANAGER || "0x0000000000000000000000000000000000000000";
     let demoMode = !!process.env.DEMO === true;
     let poaNetworkConsensus, emissionFunds;
