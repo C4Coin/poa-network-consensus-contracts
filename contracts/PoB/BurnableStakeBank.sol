@@ -21,7 +21,8 @@ pragma solidity ^0.4.24;
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import './Lockable.sol';
 import './IBurnableERC20.sol';
-import './TokenRegistry.sol';
+//import './TokenRegistry.sol';
+import '../interfaces/IRegistry.sol';
 
 
 contract BurnableStakeBank is Lockable {
@@ -32,7 +33,7 @@ contract BurnableStakeBank is Lockable {
         uint256 amount;
     }
 
-    TokenRegistry tokenRegistry;
+    IRegistry tokenRegistry;
     Checkpoint[] public stakeHistory;
     Checkpoint[] public burnHistory;
     uint256 minimumStake;
@@ -42,7 +43,7 @@ contract BurnableStakeBank is Lockable {
 
     constructor(address _tokenRegistryAddress, uint256 _minimumStake) public {
         require(_tokenRegistryAddress != 0x0);
-        tokenRegistry = TokenRegistry(_tokenRegistryAddress);
+        tokenRegistry = IRegistry(_tokenRegistryAddress);
         minimumStake = _minimumStake;
     }
 

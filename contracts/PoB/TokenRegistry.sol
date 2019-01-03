@@ -22,29 +22,17 @@ import "../interfaces/IRegistry.sol";
 
 
 contract TokenRegistry is Ownable, IRegistry {
-    //mapping (bytes32 => address) public tokens;
     mapping (address => bool) public tokens;
 
     constructor() public Ownable() {
     }
 
-    //function contains(bytes32 tokenId) public view returns (bool) {
     function exists(address token) public view returns (bool) {
         return tokens[token];
-        //return tokens[tokenId] == address(0) ? false : true;
     }
 
-    /*
-    function getAddress(bytes32 tokenId) public view returns (address) {
-        require( tokens[tokenId] != address(0) );
-        return tokens[tokenId];
-    }
-    */
-
-    //function setToken(bytes32 tokenId, address _addr) public onlyOwner {
     function add(address token) public onlyOwner {
         tokens[token] = true;
-        //tokens[tokenId] = _addr;
     }
 
     function remove(address token) public onlyOwner {
