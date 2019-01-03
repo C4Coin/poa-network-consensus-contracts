@@ -57,10 +57,11 @@ contract BurnableStakeBank is Lockable {
         updateCheckpointAtNow(stakeHistory, amount, false);
 
         // Convert bytes to bytes32
-        bytes32 tokenId = _bytesToBytes32(__data, 0);
+        //bytes32 tokenId = _bytesToBytes32(__data, 0);
+        address tokenAddr = _bytesToAddress(__data);
 
-        require( tokenRegistry.contains(tokenId));
-        IBurnableERC20 token = IBurnableERC20( tokenRegistry.getAddress(tokenId) );
+        require( tokenRegistry.exists(tokenAddr) );
+        IBurnableERC20 token = IBurnableERC20( tokenAddr );
 
         require(token.transferFrom(user, address(this), amount));
     }
@@ -69,14 +70,15 @@ contract BurnableStakeBank is Lockable {
         require(totalStakedFor(user) >= burnAmount);
 
         // Convert bytes to bytes32
-        bytes32 tokenId = _bytesToBytes32(__data, 0);
+        //bytes32 tokenId = _bytesToBytes32(__data, 0);
+        address tokenAddr = _bytesToAddress(__data);
 
         // Burn tokens
         updateCheckpointAtNow(burnsFor[user], burnAmount, false);
         updateCheckpointAtNow(burnHistory, burnAmount, false);
 
-        require( tokenRegistry.contains(tokenId));
-        IBurnableERC20 token = IBurnableERC20( tokenRegistry.getAddress(tokenId) );
+        require( tokenRegistry.exists(tokenAddr) );
+        IBurnableERC20 token = IBurnableERC20( tokenAddr );
         token.burn(burnAmount);
 
         // Remove stake
@@ -95,10 +97,11 @@ contract BurnableStakeBank is Lockable {
         updateCheckpointAtNow(stakeHistory, amount, true);
 
         // Convert bytes to bytes32
-        bytes32 tokenId = _bytesToBytes32(__data, 0);
+        //bytes32 tokenId = _bytesToBytes32(__data, 0);
+        address tokenAddr = _bytesToAddress(__data);
 
-        require( tokenRegistry.contains(tokenId));
-        IBurnableERC20 token = IBurnableERC20( tokenRegistry.getAddress(tokenId) );
+        require( tokenRegistry.exists(tokenAddr) );
+        IBurnableERC20 token = IBurnableERC20( tokenAddr );
         require(token.transfer(user, amount));
     }
 
@@ -202,6 +205,13 @@ contract BurnableStakeBank is Lockable {
         return history[min].amount;
     }
 
+    function _bytesToAddress(bytes b) private pure returns (address addr) {
+        assembly {
+            addr := mload(add(b, 20))
+        }
+    }
+
+    /*
     function _bytesToBytes32(bytes b, uint offset) private pure returns (bytes32) {
         require(b.length < 32);
         bytes32 out;
@@ -211,4 +221,5 @@ contract BurnableStakeBank is Lockable {
         }
         return out;
    }
+   */
 }
