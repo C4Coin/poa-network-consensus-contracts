@@ -19,6 +19,7 @@ const Web3 = require('web3')
 const QD = artifacts.require('./QueueDelegate.sol')
 const BSB = artifacts.require('./PoB/BurnableStakeBank.sol')
 const TR  = artifacts.require('./PoB/TokenRegistry.sol')
+const RegistryProxy  = artifacts.require('./PoB/RegistryProxy.sol')
 const BurnableERC20 = artifacts.require('./PoB/BurnableERC20.sol')
 const co2knCap = 100000
 const minStake = 1
@@ -227,7 +228,8 @@ module.exports = function(deployer, network, accounts) {
       // Delegate burn
       const burnableERC20 = await BurnableERC20.new(co2knCap);
       const tokenRegistry = await TR.new();
-      const burnableStakeBank = await BSB.new(tokenRegistry.address, minStake);
+      const registryProxy = await RegistryProxy.new(tokenRegistry.address);
+      const burnableStakeBank = await BSB.new(registryProxy.address, minStake);
       const queueDelegate = await QD.new(burnableStakeBank.address);
 
       await rewardByBlockInstance.setDelegate.call(queueDelegate.address);
@@ -236,7 +238,7 @@ module.exports = function(deployer, network, accounts) {
       await burnableStakeBank.transferOwnership(queueDelegate.address)
 
       // Register co2kn in token registry
-      tokenRegistry.setToken('test', burnableERC20.address)
+      await tokenRegistry.add(burnableERC20.address)
 
       // Transfer ownership to personal account for testing
       burnableERC20.transferOwnership(masterOfCeremony)
