@@ -20,22 +20,29 @@ pragma solidity ^0.4.24;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../interfaces/IRegistry.sol";
 
+contract RegistryProxy is Ownable {
+    IRegistry registry;
 
-contract TokenRegistry is Ownable, IRegistry {
-    mapping (address => bool) public tokens;
-
-    constructor() public Ownable() {
+    constructor(IRegistry _registry) public Ownable() {
+        registry = _registry;
     }
 
-    function exists(address token) public view returns (bool) {
-        return tokens[token];
+    function update(address _registry) public onlyOwner {
+        registry = IRegistry(_registry);
     }
 
-    function add(address token) public onlyOwner {
-        tokens[token] = true;
-    }
+    function () {
+        assembly {
+            let ptr := mload(0x40)
+            calldatacopy(ptr, 0, calldatasize)
+            //let _reg := sload(
+            let result := delegatecall(gas, sload(registry_slot), ptr, calldatasize, 0, 0)
+            let size := returndatasize
+            returndatacopy(ptr, 0, size)
 
-    function remove(address token) public onlyOwner {
-        tokens[token] = false;
+            switch result
+            case 0 { revert(ptr, size) }
+            default { return(ptr, size) }
+        }
     }
 }
